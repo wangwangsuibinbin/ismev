@@ -1,6 +1,6 @@
 Package: ismev
-Version: 1.0
-Date: 2002/11/25
+Version: 1.1
+Date: 2003/11/25
 Title: An Introduction to Statistical Modeling of Extreme Values  
 Author: Original S functions by Stuart Coles
   <Stuart.Coles@bristol.ac.uk>, R port and R documentation files 
@@ -14,3 +14,4 @@ Description: Functions to support the computations carried out in
   and point processes.  
 License: GPL (Version 2 or above)
 URL: http://www.maths.lancs.ac.uk/~stephena/
+

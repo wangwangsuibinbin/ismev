@@ -3,7 +3,8 @@ Stuart Coles to support the computations carried out in
 `An Introduction to Statistical Modelling of Extreme Values'.
       
 The file RCHANGES documents the main changes from the S 
-version. As usual, please direct all queries and bug reports 
+version. The file CHANGES documents changes from previous
+versions. As usual, please direct all queries and bug reports 
 to the Maintainer given in the DESCRIPTION file.
 
 The ismev package contains the following (user-level) 

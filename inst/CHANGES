@@ -1,0 +1,13 @@
+The first version of the ismev package was Version 1.0,
+constructed on 2002/11/25. The changes that have occured
+in subsequent versions are given below.
+
+
+Version 1.1 (2003/11/25):
+
+If the profile likelihood functions gev.prof or gev.profxi 
+calculated the likelihood at a point where the shape 
+parameter was at or very close to zero the functions would 
+error due to a mistake in the R port. This has been fixed.
+The Maintainer thanks Simon Brown for reporting this bug.  
+

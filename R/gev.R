@@ -236,13 +236,16 @@ function(z, xlow, xup, conf = 0.95, nint = 100)
 	x <- seq(xup, xlow, length = nint)
 	sol <- c(z$mle[1], z$mle[2])
         gev.plikxi <- function(a) {
-        # computes profile neg lok lik
-        if(abs(xi) < 10^(-4))
-                l <- gum.lik(c(a[1], a[2]))
+        # computes profile neg log lik
+        if (abs(xi) < 10^(-6)) {
+                y <- (z$data - a[1])/a[2]
+                if(a[2] <= 0) l <- 10^6
+                else l <- length(y) * log(a[2]) + sum(exp(-y)) + sum(y)
+        }
         else {
 		y <- (z$data - a[1])/a[2]
 		y <- 1 + xi * y
-		if(any(y <= 0) || a[2] <= 0)
+		if(a[2] <= 0 || any(y <= 0))
 			l <- 10^6
 		else l <- length(y) * log(a[2]) + sum(y^(-1/xi)) + sum(log(y
 			)) * (1/xi + 1)
@@ -269,6 +272,7 @@ function(z, m, xlow, xup, conf = 0.95, nint = 100)
 # plots profile log likelihood for m 'year' return level
 # in gev model
 #
+        if(m <= 1) stop("`m' must be greater than one")
 	cat("If routine fails, try changing plotting interval", fill = TRUE)
 	p <- 1/m
 	v <- numeric(nint)
@@ -276,14 +280,17 @@ function(z, m, xlow, xup, conf = 0.95, nint = 100)
 	sol <- c(z$mle[2], z$mle[3])
         gev.plik <- function(a) {
         # computes profile neg log lik
-        if(p != 0) mu <- xp - a[1]/a[2] * (( - log(1 - p))^( - a[2]) - 1) else 
-			mu <- xp + a[1]/a[2]
-	if(abs(a[2]) < 10^(-6))
-		l <- gum.lik(c(a[1], mu))
+        if (abs(a[2]) < 10^(-6)) {
+                mu <- xp + a[1] * log(-log(1 - p))
+                y <- (z$data - mu)/a[1]
+                if(is.infinite(mu) || a[1] <= 0) l <- 10^6
+                else l <- length(y) * log(a[1]) + sum(exp(-y)) + sum(y)
+        }
 	else {
+                mu <- xp - a[1]/a[2] * (( - log(1 - p))^( - a[2]) - 1)
 		y <- (z$data - mu)/a[1]
 		y <- 1 + a[2] * y
-                if(any(y <= 0) || a[1] <= 0)
+                if(is.infinite(mu) || a[1] <= 0 || any(y <= 0))
 			l <- 10^6
 		else l <- length(y) * log(a[1]) + sum(y^(-1/a[2])) + sum(log(
 				y)) * (1/a[2] + 1)
