@@ -41,7 +41,13 @@ pp.fit(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl =
   For non-stationary fitting it is recommended that the covariates
   within the generalized linear models are (at least approximately)
   centered and scaled (i.e.\ the columns of \code{ydat} should be
-  approximately centered and scaled).
+  approximately centered and scaled).  Otherwise, the numerics may
+  become unstable.
+
+  As of version 1.32, a more accurate estimate of the exceedance
+  rate, in the face of covariates, is used (at the expense of
+  computational efficiency).  In particular, when including covariates,
+  parameter estimates may differ from those in Coles (2001).
 }
 \value{
   A list containing the following components. A subset of these
@@ -73,6 +79,17 @@ pp.fit(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl =
   \item{cov}{The covariance matrix.}
   \item{se}{A vector containing the standard errors.}
 }
+
+\references{  
+Beirlant J, Goegebeur Y, Segers J and Teugels J. (2004). Statistics of Extremes, Wiley,
+  Chichester, England.
+
+Coles, Stuart (2001).  An Introduction to Statistical Modeling of
+ Extreme Values.  Springer-Verlag, London. }
+\note{ This code is adapted by Eric Gilleland from code originally written for S-Plus by Stuart Coles, and ported to R by Alec Stephenson. See
+details section above.}
+
+\section{Warning }{Different optimization methods may result in wildly different parameter estimates.}
 
 \seealso{\code{\link{pp.diag}}, \code{\link{optim}},
   \code{\link{pp.fitrange}}, \code{\link{mrl.plot}},

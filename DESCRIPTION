@@ -1,5 +1,5 @@
 Package: ismev
-Version: 1.3
+Version: 1.32
 Date: 2006-03-10
 Title: An Introduction to Statistical Modeling of Extreme Values  
 Author: Original S functions by Stuart Coles, R port and R 
@@ -12,5 +12,5 @@ Description: Functions to support the computations carried out in
   groups; maxima/minima, order statistics, peaks over thresholds
   and point processes.  
 License: GPL (>= 2)
-URL: http://www.maths.lancs.ac.uk/~stephena/
-Packaged: Mon Jun  2 08:54:58 2008; ericg
+URL: http://www.ral.ucar.edu/~ericg/softextreme.php
+Packaged: Mon Dec 29 09:29:03 2008; ericg

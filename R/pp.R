@@ -45,36 +45,38 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
             stop("`threshold' cannot be a function")
 	u <- rep(threshold, length.out = n)
 	if(length(unique(u)) > 1) z$trans <- TRUE
-	xdatu <- xdat[xdat > u]
-	xind <- (1:n)[xdat > u]
-	u <- u[xind]
+	uInd <- xdat > u
+    	xdatu <- xdat[uInd]
+	# xdatu <- xdat[xdat > u]
+	# xind <- (1:n)[xdat > u]
+	# u <- u[xind]
 	in2 <- sqrt(6 * var(xdat))/pi
 	in1 <- mean(xdat) - 0.57722 * in2
 	if(is.null(mul)) {
-		mumat <- as.matrix(rep(1, length(xdatu)))
+		mumat <- as.matrix(rep(1, length(xdat)))
 		muinit <- in1
 	}
 	else {
 		z$trans <- TRUE
-		mumat <- cbind(rep(1, length(xdatu)), ydat[xind, mul])
+		mumat <- cbind(rep(1, length(xdat)), ydat[, mul])
 		muinit <- c(in1, rep(0, length(mul)))
 	}
 	if(is.null(sigl)) {
-		sigmat <- as.matrix(rep(1, length(xdatu)))
+		sigmat <- as.matrix(rep(1, length(xdat)))
 		siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
-		sigmat <- cbind(rep(1, length(xdatu)), ydat[xind, sigl])
+		sigmat <- cbind(rep(1, length(xdat)), ydat[, sigl])
 		siginit <- c(in2, rep(0, length(sigl)))
 	}
 	if(is.null(shl)) {
-		shmat <- as.matrix(rep(1, length(xdatu)))
+		shmat <- as.matrix(rep(1, length(xdat)))
 		shinit <- 0.1
 	}
 	else {
 		z$trans <- TRUE
-		shmat <- cbind(rep(1, length(xdatu)), ydat[xind, shl])
+		shmat <- cbind(rep(1, length(xdat)), ydat[, shl])
 		shinit <- c(0.1, rep(0, length(shl)))
 	}
 	init <- c(muinit, siginit, shinit)
@@ -88,16 +90,16 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
 	mu <- mulink(mumat %*% (a[1:npmu]))
 	sc <- siglink(sigmat %*% (a[seq(npmu + 1, length = npsc)]))
 	xi <- shlink(shmat %*% (a[seq(npmu + npsc + 1, length = npsh)]))
-        if(any(sc <= 0)) return(10^6)
-	if(min(1 + ((xi * (u - mu))/sc)) < 0) {
+        if(any(sc^uInd <= 0)) return(10^6)
+	if(min((1 + ((xi * (u - mu))/sc))^uInd) < 0) {
 		l <- 10^6
 	}
 	else {
-		y <- (xdatu - mu)/sc
+		y <- (xdat - mu)/sc
 		y <- 1 + xi * y
 		if(min(y) <= 0)
 			l <- 10^6
-		else l <- sum(log(sc)) + sum(log(y) * (1/xi + 1)) + n/npy * 
+		else l <- sum(uInd*log(sc)) + sum(uInd*log(y) * (1/xi + 1)) + n/npy * 
 				mean((1 + (xi * (u - mu))/sc)^(-1/xi))
 	}
 	l
@@ -112,8 +114,7 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
 	z$vals <- cbind(mu, sc, xi, u)
 	z$gpd <- apply(z$vals, 1, ppp, npy)
 	if(z$trans) {
-		z$data <- as.vector((1 + (xi * (xdatu - u))/z$gpd[2,  ])^(-1/xi
-			))
+		z$data <- as.vector((1 + (xi[uInd] * (xdatu - u[uInd]))/z$gpd[2, uInd])^(-1/xi[uInd]))
 	}
 	z$mle <- x$par
         z$cov <- solve(x$hessian)
@@ -140,8 +141,8 @@ function(z)
 		plot(x, sort(z$data), xlab = "empirical", ylab = "model")
 		abline(0, 1, col = 3)
 		title("Residual Probability Plot")
-		plot( - log(1 - x),  - log(1 - sort(z$data)), ylab = 
-			"empirical", xlab = "model")
+		# plot( - log(1 - x),  - log(1 - sort(z$data)), ylab = "empirical", xlab = "model")
+		plot( - log(1 - x),  sort(-log(z$data)), ylab = "empirical", xlab = "model")
 		abline(0, 1, col = 3)
 		title("Residual quantile Plot (Exptl. Scale)")
 	}
