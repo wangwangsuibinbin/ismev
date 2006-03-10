@@ -2,6 +2,15 @@ The first version of the ismev package was Version 1.0,
 constructed on 2002/11/25. The changes that have occured
 in subsequent versions are given below.
 
+Vesion 1.2 (2006/03/10):
+
+The column name "Sea Level" in the portpirie and fremantle
+datasets has been changed to "SeaLevel" to prevent problems
+with inclusion in formula arguments to functions in other
+R packages. The Maintainer thanks Thomas Yee for this
+suggestion.
+ 
+The maintainer address has changed.
 
 Version 1.1 (2003/11/25):
 

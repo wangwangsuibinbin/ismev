@@ -12,7 +12,7 @@
   This data frame contains the following columns:
   \describe{
     \item{Year}{A numeric vector of years.}
-    \item{Sea Level}{A numeric vector of annual sea level
+    \item{SeaLevel}{A numeric vector of annual sea level
       maxima.}
   }
 }
