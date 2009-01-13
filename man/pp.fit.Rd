@@ -9,7 +9,8 @@
 \usage{
 pp.fit(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl =
     NULL, shl = NULL, mulink = identity, siglink = identity, shlink =
-    identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, \dots)
+    identity, muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE,
+    method = "Nelder-Mead", maxit = 10000, \dots)
 }
 \arguments{
   \item{xdat}{A numeric vector of data to be fitted.}
@@ -28,6 +29,8 @@ pp.fit(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl =
   \item{mulink, siglink, shlink}{Inverse link functions for generalized
     linear modelling of the location, scale and shape parameters
     repectively.}
+  \item{muinit, siginit, shinit}{numeric giving initial parameter estimates.
+    See Details section for information on default (NULL) initial values.}
   \item{show}{Logical; if \code{TRUE} (the default), print details of
     the fit.}
   \item{method}{The optimization method (see \code{\link{optim}} for
@@ -48,6 +51,16 @@ pp.fit(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl =
   rate, in the face of covariates, is used (at the expense of
   computational efficiency).  In particular, when including covariates,
   parameter estimates may differ from those in Coles (2001).
+
+  Let m=mean(xdat) and s=sqrt(6*var(xdat))/pi.  Then, initial values
+  assigend when 'muinit' is NULL are m - 0.57722 * s (stationary case).
+  When 'siginit' is NULL, the initial value is taken to be s, and when
+  'shinit' is NULL, the initial value is taken to be 0.1.  When
+  covariates are introduced (non-stationary case), these same initial
+  values are used by default for the constant term, and zeros for all
+  other terms.  For example, if a GEV( mu(t)=mu0+mu1*t, sigma, xi) is
+  being fitted, then the initial value for mu0 is m - 0.57722 * s, and
+  0 for mu1.
 }
 \value{
   A list containing the following components. A subset of these

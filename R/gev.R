@@ -3,7 +3,7 @@
 # gevf  gevq  gev.dens  gev.profxi  gev.prof
 
 "gev.fit"<-
-function(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
+function(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
 {
 #
 # obtains mles etc for gev distn
@@ -19,30 +19,30 @@ function(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identi
 	in1 <- mean(xdat) - 0.57722 * in2
 	if(is.null(mul)) {
 		mumat <- as.matrix(rep(1, length(xdat)))
-		muinit <- in1
+		if( is.null( muinit)) muinit <- in1
 	}
 	else {
 		z$trans <- TRUE
 		mumat <- cbind(rep(1, length(xdat)), ydat[, mul])
-		muinit <- c(in1, rep(0, length(mul)))
+		if( is.null( muinit)) muinit <- c(in1, rep(0, length(mul)))
 	}
 	if(is.null(sigl)) {
 		sigmat <- as.matrix(rep(1, length(xdat)))
-		siginit <- in2
+		if( is.null( siginit)) siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
 		sigmat <- cbind(rep(1, length(xdat)), ydat[, sigl])
-		siginit <- c(in2, rep(0, length(sigl)))
+		if( is.null( siginit)) siginit <- c(in2, rep(0, length(sigl)))
 	}
 	if(is.null(shl)) {
 		shmat <- as.matrix(rep(1, length(xdat)))
-		shinit <- 0.1
+		if( is.null( shinit)) shinit <- 0.1
 	}
 	else {
 		z$trans <- TRUE
 		shmat <- cbind(rep(1, length(xdat)), ydat[, shl])
-		shinit <- c(0.1, rep(0, length(shl)))
+		if( is.null( shinit)) shinit <- c(0.1, rep(0, length(shl)))
 	}
 	z$model <- list(mul, sigl, shl)
 	z$link <- deparse(substitute(c(mulink, siglink, shlink)))
@@ -80,6 +80,7 @@ function(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identi
 	    if(!z$conv)
                 print(z[c(5, 7, 9)])
 	}
+	class( z) <- "gev.fit"
 	invisible(z)
 }
 

@@ -8,7 +8,8 @@
 }
 \usage{
 gpd.fit(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL,
-    shl = NULL, siglink = identity, shlink = identity, show = TRUE,
+    shl = NULL, siglink = identity, shlink = identity, siginit = NULL,
+    shinit = NULL, show = TRUE,
     method = "Nelder-Mead", maxit = 10000, \dots)
 }
 \arguments{
@@ -27,6 +28,11 @@ gpd.fit(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL,
     stationary).}
   \item{siglink, shlink}{Inverse link functions for generalized
     linear modelling of the scale and shape parameters repectively.}
+  \item{siginit, shinit}{numeric giving initial value(s) for parameter
+	estimates.  If NULL, default is sqrt(6 * var(xdat))/pi and 0.1
+	for the scale and shape parameters, resp.  If using parameter
+	covariates, then these values are used for the constant term,
+	and zeros for all other terms.}
   \item{show}{Logical; if \code{TRUE} (the default), print details of
     the fit.}
   \item{method}{The optimization method (see \code{\link{optim}} for

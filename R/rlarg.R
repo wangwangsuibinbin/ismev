@@ -3,7 +3,7 @@
 # rlargf  rlargq  rlargq2
 
 "rlarg.fit"<-
-function(xdat, r = dim(xdat)[2], ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
+function(xdat, r = dim(xdat)[2], ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
 {
 #
 # calculates mles etc for rlargest order statistic model
@@ -17,30 +17,30 @@ function(xdat, r = dim(xdat)[2], ydat = NULL, mul = NULL, sigl = NULL, shl = NUL
 	in1 <- mean(xdat[, 1]) - 0.57722 * in2
 	if(is.null(mul)) {
 		mumat <- as.matrix(rep(1, dim(xdat)[1]))
-		muinit <- in1
+		if( is.null( muinit)) muinit <- in1
 	}
 	else {
 		z$trans <- TRUE
 		mumat <- cbind(rep(1, dim(xdat)[1]), ydat[, mul])
-		muinit <- c(in1, rep(0, length(mul)))
+		if( is.null( muinit)) muinit <- c(in1, rep(0, length(mul)))
 	}
 	if(is.null(sigl)) {
 		sigmat <- as.matrix(rep(1, dim(xdat)[1]))
-		siginit <- in2
+		if( is.null( siginit)) siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
 		sigmat <- cbind(rep(1, dim(xdat)[1]), ydat[, sigl])
-		siginit <- c(in2, rep(0, length(sigl)))
+		if( is.null( siginit)) siginit <- c(in2, rep(0, length(sigl)))
 	}
 	if(is.null(shl)) {
 		shmat <- as.matrix(rep(1, dim(xdat)[1]))
-		shinit <- 0.1
+		if( is.null( shinit)) shinit <- 0.1
 	}
 	else {
 		z$trans <- TRUE
 		shmat <- cbind(rep(1, dim(xdat)[1]), ydat[, shl])
-		shinit <- c(0.1, rep(0, length(shl)))
+		if( is.null( shinit)) shinit <- c(0.1, rep(0, length(shl)))
 	}
         xdatu <- xdat[, 1:r, drop = FALSE]
         init <- c(muinit, siginit, shinit)
@@ -89,6 +89,7 @@ function(xdat, r = dim(xdat)[2], ydat = NULL, mul = NULL, sigl = NULL, shl = NUL
 	    if(!z$conv)
 		print(z[c(5, 7, 9)])
         }
+	class( z) <- "rlarg.fit"
 	invisible(z)
 }
 

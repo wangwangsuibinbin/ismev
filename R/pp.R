@@ -33,7 +33,7 @@ function(data, umin, umax, npy = 365, nint = 10, show = FALSE)
 }
 
 "pp.fit"<-
-function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
+function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL, mulink = identity, siglink = identity, shlink = identity, muinit = NULL, siginit = NULL, shinit = NULL, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
 {
 	z <- list()
         npmu <- length(mul) + 1
@@ -54,30 +54,30 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
 	in1 <- mean(xdat) - 0.57722 * in2
 	if(is.null(mul)) {
 		mumat <- as.matrix(rep(1, length(xdat)))
-		muinit <- in1
+		if( is.null( muinit)) muinit <- in1
 	}
 	else {
 		z$trans <- TRUE
 		mumat <- cbind(rep(1, length(xdat)), ydat[, mul])
-		muinit <- c(in1, rep(0, length(mul)))
+		if( is.null( muinit)) muinit <- c(in1, rep(0, length(mul)))
 	}
 	if(is.null(sigl)) {
 		sigmat <- as.matrix(rep(1, length(xdat)))
-		siginit <- in2
+		if( is.null( siginit)) siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
 		sigmat <- cbind(rep(1, length(xdat)), ydat[, sigl])
-		siginit <- c(in2, rep(0, length(sigl)))
+		if( is.null( siginit)) siginit <- c(in2, rep(0, length(sigl)))
 	}
 	if(is.null(shl)) {
 		shmat <- as.matrix(rep(1, length(xdat)))
-		shinit <- 0.1
+		if( is.null( shinit)) shinit <- 0.1
 	}
 	else {
 		z$trans <- TRUE
 		shmat <- cbind(rep(1, length(xdat)), ydat[, shl])
-		shinit <- c(0.1, rep(0, length(shl)))
+		if( is.null( shinit)) shinit <- c(0.1, rep(0, length(shl)))
 	}
 	init <- c(muinit, siginit, shinit)
 	z$model <- list(mul, sigl, shl)
@@ -128,6 +128,7 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
 	    if(!z$conv)
 		print(z[c(9, 12, 14)])
         }
+	class( z) <- "pp.fit"
         invisible(z)
 }
 
@@ -213,12 +214,4 @@ function(a, npy)
 	xi <- a[3]
 	c(la, sc, xi)
 }
-
-
-
-
-
-
-
-
 

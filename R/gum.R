@@ -2,7 +2,7 @@
 # gum.fit  gum.diag  gum.rl  gum.df  gum.q  gum.dens
 
 "gum.fit"<-
-function(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity, siglink = identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
+function(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity, siglink = identity, muinit = NULL, siginit = NULL, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
 {
 #
 # finds mles etc for gumbel model
@@ -15,21 +15,21 @@ function(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity, siglink 
 	in1 <- mean(xdat) - 0.57722 * in2
 	if(is.null(mul)) {
 		mumat <- as.matrix(rep(1, length(xdat)))
-		muinit <- in1
+		if( is.null( muinit)) muinit <- in1
 	}
 	else {
 		z$trans <- TRUE
 		mumat <- cbind(rep(1, length(xdat)), ydat[, mul])
-		muinit <- c(in1, rep(0, length(mul)))
+		if( is.null( muinit)) muinit <- c(in1, rep(0, length(mul)))
 	}
 	if(is.null(sigl)) {
 		sigmat <- as.matrix(rep(1, length(xdat)))
-		siginit <- in2
+		if( is.null( siginit)) siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
 		sigmat <- cbind(rep(1, length(xdat)), ydat[, sigl])
-		siginit <- c(in2, rep(0, length(sigl)))
+		if( is.null( siginit)) siginit <- c(in2, rep(0, length(sigl)))
 	}
 	z$model <- list(mul, sigl)
 	z$link <- c(deparse(substitute(mulink)), deparse(substitute(siglink)))
@@ -65,6 +65,7 @@ function(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity, siglink 
 	    if(!z$conv)
                 print(z[c(5, 7, 9)])
         }
+	class( z) <- "gum.fit"
 	invisible(z)
 }
 

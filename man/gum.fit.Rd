@@ -8,8 +8,8 @@
 }
 \usage{
 gum.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity,
-    siglink = identity, show = TRUE, method = "Nelder-Mead",
-    maxit = 10000, \dots)
+    siglink = identity, muinit = NULL, siginit = NULL, show = TRUE,
+    method = "Nelder-Mead", maxit = 10000, \dots)
 }
 \arguments{
   \item{xdat}{A numeric vector of data to be fitted.}
@@ -25,6 +25,8 @@ gum.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity,
   \item{mulink, siglink}{Inverse link functions for generalized
     linear modelling of the location and scale parameters
     repectively.}
+  \item{muinit, siginit}{numeric giving initial parameter estimates.  See
+    Details section for information about default values (NULL).}
   \item{show}{Logical; if \code{TRUE} (the default), print details of
     the fit.}
   \item{method}{The optimization method (see \code{\link{optim}} for
@@ -39,6 +41,15 @@ gum.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, mulink = identity,
   within the generalized linear models are (at least approximately)
   centered and scaled (i.e.\ the columns of \code{ydat} should be
   approximately centered and scaled).
+
+  Let m=mean(xdat) and s=sqrt(6*var(xdat))/pi.  Then, initial values
+  assigend when 'muinit' is NULL are m - 0.57722 * s (stationary case).
+  When 'siginit' is NULL, the initial value is taken to be s, and when
+  'shinit' is NULL.  When covariates are introduced (non-stationary case),
+  these same initial values are used by default for the constant term,
+  and zeros for all other terms.  For example, if a
+  Gumbel( mu(t)=mu0+mu1*t, sigma) is being fitted, then the initial value
+  for mu0 is m - 0.57722 * s, and 0 for mu1.
 }
 \value{
   A list containing the following components. A subset of these

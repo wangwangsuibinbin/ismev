@@ -1,9 +1,9 @@
 # This file contains the following functions:
 # identity  q.form  mrl.plot
 
-"identity"<-
-function(x)
-x
+# "identity"<-
+# function(x)
+# x
 
 "q.form"<-
 function(d, m)

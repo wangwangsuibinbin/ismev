@@ -37,7 +37,7 @@ function(data, umin, umax, nint = 10, show = FALSE)
 }
 
 "gpd.fit"<-
-function(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL, shl = NULL, siglink = identity, shlink = identity, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
+function(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL, shl = NULL, siglink = identity, shlink = identity, siginit = NULL, shinit = NULL, show = TRUE, method = "Nelder-Mead", maxit = 10000, ...)
 {
 # 
 # obtains mles etc for gpd model
@@ -58,21 +58,21 @@ function(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL, shl = NULL, sigli
 	in1 <- mean(xdat, na.rm = TRUE) - 0.57722 * in2
 	if(is.null(sigl)) {
 		sigmat <- as.matrix(rep(1, length(xdatu)))
-		siginit <- in2
+		if( is.null( siginit)) siginit <- in2
 	}
 	else {
 		z$trans <- TRUE
 		sigmat <- cbind(rep(1, length(xdatu)), ydat[xind, sigl])
-		siginit <- c(in2, rep(0, length(sigl)))
+		if( is.null( siginit)) siginit <- c(in2, rep(0, length(sigl)))
 	}
 	if(is.null(shl)) {
 		shmat <- as.matrix(rep(1, length(xdatu)))
-		shinit <- 0.1
+		if( is.null( shinit)) shinit <- 0.1
 	}
 	else {
 		z$trans <- TRUE
 		shmat <- cbind(rep(1, length(xdatu)), ydat[xind, shl])
-		shinit <- c(0.1, rep(0, length(shl)))
+		if( is.null( shinit)) shinit <- c(0.1, rep(0, length(shl)))
 	}
 	init <- c(siginit, shinit)
 	z$model <- list(sigl, shl)
@@ -124,6 +124,7 @@ function(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL, shl = NULL, sigli
 	    if(!z$conv)
 		print(z[c(8, 10, 11, 13)])
         }
+	class( z) <- "gpd.fit"
 	invisible(z)
 }
 

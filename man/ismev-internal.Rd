@@ -36,7 +36,6 @@
 \alias{gum.dens}
 \alias{ppp}
 
-\alias{identity}
 \alias{q.form}
 
 \title{Internal Functions}

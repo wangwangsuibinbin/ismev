@@ -19,6 +19,9 @@ gpd.prof                Profile Log-likelihoods for Stationary GPD
 gum.diag                Diagnostic Plots for Gumbel Models
 gum.fit                 Maximum-likelihood Fitting of the Gumbel
                         Distribution
+ismev                   ismev -- The Extremes Toolkit: Weather and
+                        Climate Applications of Extreme-Value
+                        Statistics
 mrl.plot                Mean Residual Life Plot
 portpirie               Annual Maximum Sea Levels at Port Pirie, South
                         Australia
