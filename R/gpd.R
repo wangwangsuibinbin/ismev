@@ -33,7 +33,7 @@ function(data, umin, umax, nint = 10, show = FALSE)
 			lines(c(u[j], u[j]), c(ul[j, i], up[j, i]))
 	}
         par(oldpar)
-        invisible()
+        invisible(list(thresholds=u, mle=m, se=s, ci.low=ul, ci.up=up))
 }
 
 "gpd.fit"<-
