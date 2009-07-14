@@ -1,5 +1,10 @@
 \name{ismev-internal}
 
+\alias{GPD.fit}
+\alias{GPD.predict}
+\alias{lambda.fit}
+\alias{lambda.predict}
+
 \alias{gev.pp}
 \alias{gpd.pp}
 \alias{pp.pp}

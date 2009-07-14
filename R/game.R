@@ -14,7 +14,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 
-## *G*eneralized *A*dditive *M*odel for *E*xtremes
+## *G*eneralized *A*dditive *M*odeling for *E*xtremes
 ##
 ## Remark:
 ## 1) Notation:
@@ -27,22 +27,22 @@
 ##                   = 1-exp(-x/beta)          if xi =0
 ##    x>=0 when xi>=0 and x in [0,-beta/xi] when xi<0
 ## 3) GPD(xi, beta) density for xi>0:
-##    g_{xi,beta}(x) = (1+xi*x/beta)^(-(1+1/xi))/beta if xi!=0, x>0
+##    g_{xi,beta}(x) = (1+xi*x/beta)^(-(1+1/xi))/beta if x>0
 
 
 ## loading required packages
-require(mgcv) # comes with R natively (one of the recommended packages)
-require(ismev) # for computing initial values xi.init, beta.init (not required to load within package ismev)
+# require(mgcv) # comes with R natively (one of the recommended packages)
+# require(ismev) # for computing initial values xi.init, beta.init (not required to load within package ismev)
 
 
-### auxiliary functions ########################################################
+### Auxiliary functions ########################################################
 
 ##' Reparameterized log-likelihood l^r(xi, nu; y_1,..,y_n) = l(xi, exp(nu)/(1+xi);
 ##' y_1,..,y_n), where l(xi, beta; y_1,..,y_n) = -n*log(beta)-(1+1/xi)*sum(
 ##' log(1+xi*y_i/beta)) denotes the log-likelihood of a GPD(xi, beta) distribution
 ##'
-##' @title reparameterized log-likelihood l^r
-##' @param y vector of exceedances (over a high threshold u)
+##' @title Reparameterized log-Likelihood l^r
+##' @param y vector of excesses (over a high threshold u)
 ##' @param xi GPD(xi,beta) (single) parameter xi
 ##' @param nu GPD(xi, beta) (single) parameter nu (orthogonal in the Fisher
 ##'        information metric to xi)
@@ -62,10 +62,8 @@ rLogL <- function(y, xi, nu, multivariate=TRUE)
     }
 }
 
-##' Compute derivatives of the reparameterized log-likelihood
-##'
-##' @title Compute derivatives of the reparameterized log-likelihood
-##' @param y vector of exceedances (over a high threshold u)
+##' @title Compute Derivatives of the Reparameterized log-Likelihood
+##' @param y vector of excesses (over a high threshold u)
 ##' @param xi vector of GPD(xi,beta) parameters xi
 ##' @param nu vector of (orthogonal in the Fisher information metric)
 ##'        GPD(xi, beta) parameters nu
@@ -132,9 +130,7 @@ DrLogL <- function(y, xi, nu, verbose=TRUE)
     cbind(rl.xi=rl.xi, rl.nu=rl.nu, rl.xixi=rl.xixi, rl.nunu=rl.nunu)
 }
 
-##' Function to check and adjust second-order derivatives
-##'
-##' @title Function to check and adjust second-order derivatives
+##' @title Function to Check and Adjust Second-Order Derivatives
 ##' @param der vector second-order derivatives
 ##' @param verbose logical indicating whether warnings about adjustments of
 ##'        the derivatives are printed
@@ -169,10 +165,8 @@ adjustD2 <- function(der, verbose=TRUE)
     der
 }
 
-##' Compute update (one iteration) in gamGPDfit()
-##'
-##' @title Compute update (one iteration) in gamGPDfit()
-##' @param y data.frame containing the exceedances over the threshold in a column
+##' @title Compute Update (one Iteration) in gamGPDfit()
+##' @param y data.frame containing the excesses over the threshold in a column
 ##'        labeled yname
 ##' @param xi.nu 2-column matrix of GPD parameters (xi,nu) to be updated where
 ##'        nu is orthogonal to xi in the Fisher information metric
@@ -180,8 +174,8 @@ adjustD2 <- function(der, verbose=TRUE)
 ##'        for fitting xi
 ##' @param nuFrhs right-hand side of the formula for nu in the gam() call
 ##'        for fitting nu
-##' @param eyname string containing the name of the column of y which contains
-##'        the exceedances
+##' @param yname string containing the name of the column of y which contains
+##'        the excesses
 ##' @param verbose logical indicating whether warnings about adjustments of
 ##'        the derivatives and wrong arguments in DrLogL() are printed
 ##' @param ... additional arguments passed to gam()
@@ -194,10 +188,20 @@ adjustD2 <- function(der, verbose=TRUE)
 ##' Note: That's a helper function of gamGPDfit()
 gamGPDfitUp <- function(y, xi.nu, xiFrhs, nuFrhs, yname, verbose=TRUE, ...)
 {
-    stopifnot(is.data.frame(y), (dim. <- dim(y))[2] >= 1,
-              length(which(colnames(y)==yname))==1,
-              (n <- dim.[1]) > 0, dim(xi.nu)==c(n, 2),
-              require(mgcv))
+    if(!is.data.frame(y)) stop("gamGPDfitUp: invalid y argument.")
+
+    dim. <- dim( y )
+    n <- dim.[ 1 ]
+
+    if(dim.[ 2 ] < 1 || n <= 0) stop("gamGPDfitUp: invalid y argument.")
+
+    if(dim(xi.nu) != c(n, 2)) stop("gamGPDfitUp: invalid xi.nu argument.")
+    
+
+#    stopifnot(is.data.frame(y), (dim. <- dim(y))[2] >= 1,
+#              length(which(colnames(y)==yname))==1,
+#              (n <- dim.[1]) > 0, dim(xi.nu)==c(n, 2),
+#              require(mgcv))
 
     ## pick out xi and nu (for readability)
     xi <- xi.nu[,1]
@@ -238,18 +242,14 @@ gamGPDfitUp <- function(y, xi.nu, xiFrhs, nuFrhs, yname, verbose=TRUE, ...)
 }
 
 
-### gamGPDfit ##################################################################
+### gamGPDfit() ################################################################
 
-##' Semi-parametric estimation of GPD parameters via penalized maximum likelihood
-##' estimation based on an iteratively reweighted least squares (backfitting)
-##' algorithm
-##'
-##' @title Semi-parametric fitting of GPD parameters via penalized
-##'        maximum likelihood estimation
+##' @title Semi-parametric Estimation of GPD Parameters via Penalized
+##'        Maximum Likelihood Estimation Based on Reweighted Least Squares (Backfitting)
 ##' @param x data.frame containing the losses (all other columns are treated
 ##'        as covariates)
 ##' @param threshold POT threshold above which losses are considered
-##' @param nexceed number of exceedances
+##' @param nexc number of excesses
 ##' @param datvar name of the data column which contains the data to be modeled,
 ##'        for example, the losses
 ##' @param xiFrhs right-hand side of the formula for xi in the gam() call
@@ -258,6 +258,8 @@ gamGPDfitUp <- function(y, xi.nu, xiFrhs, nuFrhs, yname, verbose=TRUE, ...)
 ##'        for fitting nu
 ##' @param init bivariate vector containing initial values for (xi, beta)
 ##' @param niter maximal number of iterations in the backfitting algorithm
+##' @param include.updates logical indicating whether updates for xi and nu are
+##'        returned as well
 ##' @param epsxi epsilon for stop criterion for xi
 ##' @param epsnu epsilon for stop criterion for nu
 ##' @param progress logical indicating whether progress information is displayed
@@ -266,30 +268,30 @@ gamGPDfitUp <- function(y, xi.nu, xiFrhs, nuFrhs, yname, verbose=TRUE, ...)
 ##' @param ... additional arguments passed to gam() (called by gamGPDfitUp())
 ##' @return a list; see below
 ##' @author Marius Hofert
-gamGPDfit <- function(x, threshold, nexceed=NULL, datvar,
-                      xiFrhs, nuFrhs,
+gamGPDfit <- function(x, threshold, nexc=NULL, datvar, xiFrhs, nuFrhs,
                       init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
-                      niter=128, epsxi=1e-5, epsnu=1e-5,
+                      niter=32, include.updates=FALSE, epsxi=1e-5, epsnu=1e-5,
                       progress=TRUE, verbose=FALSE, ...)
 {
     ## checks
-    stopifnot(is.data.frame(x), length(init)==2, niter>=1, epsxi>0, epsnu>0,
-              datvar %in% colnames(x))
+    stopifnot(is.data.frame(x), length(init)==2, niter>=1, epsxi>0, epsnu>0)
     has.threshold <- !missing(threshold)
-    has.nexceed <- !is.null(nexceed)
-    if(has.threshold && has.nexceed) warning("Only one of 'threshold' and 'nexceed' is allowed -- will take 'threshold'") # both threshold and nexceed given
-    if(!has.threshold && !has.nexceed) stop("Provide either 'threshold' or 'nexceed'") # none of threshold or nexceed given
+    has.nexc <- !is.null(nexc)
+    if(has.threshold && has.nexc)
+        warning("Only one of 'threshold' and 'nexc' is allowed -- will take 'threshold'") # both threshold and nexc given
+    if(!has.threshold && !has.nexc)
+        stop("Provide either 'threshold' or 'nexc'") # none of threshold or nexc given
     dim. <- dim(x) # dimension of x
     stopifnot((n <- dim.[1])>=1, dim.[2]>=2) # there should at least be one observation (actually, quite a bit more) and one column of covariates
-    if(has.nexceed){ # nexceed given but no threshold
-        stopifnot(0 < nexceed, nexceed <= n)
-        threshold <- quantile(x[,datvar], probs=1-nexceed/n)
+    if(has.nexc){ # nexc given but no threshold
+        stopifnot(0 < nexc, nexc <= n)
+        threshold <- quantile(x[,datvar], probs=1-nexc/n, names=FALSE)
     } # => now we can work with threshold
 
-    ## determine exceedances
-    y. <- x[x[,datvar]>threshold,] # pick out exceedances; note: y. still contains covariates
-    y.[,datvar] <- y.[,datvar] - threshold # replace exceedances by exceedance sizes
-    n.ex <- nrow(y.) # number of exceedances
+    ## determine excesses
+    y. <- x[x[,datvar]>threshold,] # pick out excesses; note: y. still contains covariates
+    y.[,datvar] <- y.[,datvar] - threshold # replace excesses by excess sizes
+    n.ex <- nrow(y.) # number of excesses
 
     ## initial values for xi, beta, and nu (nu = reparameterization of beta)
     xi.init <- init[1]
@@ -361,29 +363,45 @@ gamGPDfit <- function(x, threshold, nexceed=NULL, datvar,
     se.xi <- updates[[iter]]$xi.weights
     se.nu <- updates[[iter]]$nu.weights
 
-    ## return list
-    list(xi=xi, # estimated xi
-         beta=beta, # estimated beta
-         nu=nu, # estimated nu
-         se.xi=se.xi, # standard error for xi
-         se.nu=se.nu, # standard error for nu
-         covar=y.[,-which(colnames(y.)==datvar), drop=FALSE], # covariates (corresponding to xi, beta, etc.)
-         y=y.[,datvar], # exceedances
-         res=log1p(y.[,datvar]*xi/beta)/xi, # residuals
-         MRD=MRD, # mean relative distances between old/new (xi, nu) for all iterations
-         logL=logL, # log-likelihood at the estimated parameters
-         xiObj=xiObj, # gamObject for estimated xi (return object of mgcv::gam())
-         nuObj=nuObj, # gamObject for estimated nu (return object of mgcv::gam())
-         xiUpdates=lapply(updates, `[[`, "xi"), # updates for xi for each iteration (list of gamObject objects); contains xiObj as last element
-         nuUpdates=lapply(updates, `[[`, "nu")) # updates for nu for each iteration (list of gamObject objects); contains nuObj as last element
+    ## determine *all* combinations of the provided covariates
+    ## xi
+    xi.covars <- names(xiObj$var.summary)
+    x.xi <- x[,xi.covars, drop=FALSE] # all cols with covariates used for fitting xi
+    all.covars.xi <- lapply(seq_len(ncol(x.xi)), function(j) sort(unique(x.xi[,j]))) # determine levels
+    ## => we only can determine those which appear at least in one column
+    names(all.covars.xi) <- colnames(x.xi) # put in names
+    ## nu
+    nu.covars <- names(nuObj$var.summary)
+    x.nu <- x[,nu.covars, drop=FALSE] # all cols with covariates used for fitting nu
+    all.covars.nu <- lapply(seq_len(ncol(x.nu)), function(j) sort(unique(x.nu[,j]))) # determine levels
+    names(all.covars.nu) <- colnames(x.nu) # put in names
+
+    ## build list
+    res <- list(xi=xi, # estimated xi
+                beta=beta, # estimated beta
+                nu=nu, # estimated nu
+                se.xi=se.xi, # standard error for xi
+                se.nu=se.nu, # standard error for nu
+                xi.covar=all.covars.xi, # (unique) covariates for xi
+                nu.covar=all.covars.nu, # (unique) covariates for nu
+                covar=y.[,union(xi.covars, nu.covars)], # *available* (not necessarily all) covariate combinations used for fitting beta (= xi *and* nu)
+                y=y.[,datvar], # excesses
+                res=log1p(y.[,datvar]*xi/beta)/xi, # residuals
+                MRD=MRD, # mean relative distances between old/new (xi, nu) for all iterations
+                logL=logL, # log-likelihood at the estimated parameters
+                xiObj=xiObj, # gamObject for estimated xi (return object of mgcv::gam())
+                nuObj=nuObj) # gamObject for estimated nu (return object of mgcv::gam())
+    if(include.updates) res <- c(res, xiUpdates=lapply(updates, `[[`, "xi"), # updates for xi for each iteration (list of gamObject objects); contains xiObj as last element
+                                 nuUpdates=lapply(updates, `[[`, "nu")) # updates for nu for each iteration (list of gamObject objects); contains nuObj as last element
+
+    ## return
+    res
 }
 
 
-### gamGPDboot #################################################################
+### gamGPDboot() ###############################################################
 
-##' Adjusted sampling for 1-element vectors
-##'
-##' @title Adjusted sampling for 1-element vectors
+##' @title Adjusted Sampling for 1-Element Vectors
 ##' @param x see sample()
 ##' @param size see sample()
 ##' @param replace see sample()
@@ -394,19 +412,17 @@ gamGPDfit <- function(x, threshold, nexceed=NULL, datvar,
 sample.real <- function(x, size, replace=FALSE, prob=NULL)
     if(length(x)==1) x else sample(x, size=size, replace=replace, prob=prob)
 
-##' Post-blackend bootstrap of Chavez-Demoulin and Davison (2005) for gamGPDfit()
-##'
-##' @title Post-blackend bootstrap of Chavez-Demoulin and Davison (2005) for
-##'        gamGPDfit()
+##' @title Post-blackend Bootstrap of Chavez-Demoulin and Davison (2005) for gamGPDfit()
 ##' @param x see gamGPDfit()
 ##' @param B number of bootstrap replications
 ##' @param threshold see gamGPDfit()
-##' @param nexceed see gamGPDfit()
+##' @param nexc see gamGPDfit()
 ##' @param datvar see gamGPDfit()
 ##' @param xiFrhs see gamGPDfit()
 ##' @param nuFrhs see gamGPDfit()
 ##' @param init see gamGPDfit()
 ##' @param niter see gamGPDfit()
+##' @param include.updates see gamGPDfit()
 ##' @param epsxi see gamGPDfit()
 ##' @param epsnu see gamGPDfit()
 ##' @param boot.progress logical indicating whether progress information is displayed
@@ -414,11 +430,13 @@ sample.real <- function(x, size, replace=FALSE, prob=NULL)
 ##' @param verbose see gamGPDfit() (only used if progress==TRUE)
 ##' @param debug logical indicating whether initial fit is saved
 ##' @param ... see gamGPDfit()
-##' @return a list; see below
+##' @return a list of length B+1, the first component being the fitted object
+##'         as returned by gamGPDfit(); the other components contain similar
+##'         objects based on the B bootstrap replications.
 ##' @author Marius Hofert
-gamGPDboot <- function(x, B, threshold, nexceed=NULL, datvar, xiFrhs, nuFrhs,
+gamGPDboot <- function(x, B, threshold, nexc=NULL, datvar, xiFrhs, nuFrhs,
                        init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
-                       niter=128, epsxi=1e-5, epsnu=1e-5,
+                       niter=32, include.updates=FALSE, epsxi=1e-5, epsnu=1e-5,
                        boot.progress=TRUE, progress=FALSE, verbose=FALSE,
                        debug=FALSE, ...)
 {
@@ -431,154 +449,276 @@ gamGPDboot <- function(x, B, threshold, nexceed=NULL, datvar, xiFrhs, nuFrhs,
     }
 
     ## (major) fit using gamGPDfit()
-    fit. <- gamGPDfit(x=x, threshold=threshold, nexceed=nexceed, datvar=datvar,
-                      xiFrhs=xiFrhs, nuFrhs=nuFrhs, init=init, niter=niter,
-                      epsxi=epsxi, epsnu=epsnu,
-                      progress=if(!boot.progress) FALSE else progress,
-                      verbose=if(!boot.progress) FALSE else verbose, ...)
+    fit <- gamGPDfit(x=x, threshold=threshold, nexc=nexc, datvar=datvar,
+                     xiFrhs=xiFrhs, nuFrhs=nuFrhs, init=init, niter=niter,
+                     include.updates=include.updates, epsxi=epsxi, epsnu=epsnu,
+                     progress=if(!boot.progress) FALSE else progress,
+                     verbose=if(!boot.progress) FALSE else verbose, ...)
 
     ## progress
     if(boot.progress) if(progress) cat("\n") else setTxtProgressBar(pb, 1)
 
     ## pick out fitted values
-    xi <- fit.$xi # fitted xi
-    nu <- fit.$nu # fitted nu
+    xi <- fit$xi # fitted xi
+    nu <- fit$nu # fitted nu
     beta <- exp(nu)/(1+xi) # fitted beta
 
     ## for debugging
-    if(debug) save(fit., file="gamGPDboot_debug.rda")
+    if(debug) save(fit, file="gamGPDboot_debug.rda")
 
     ## post-blackened bootstrap; see Chavez-Demoulin and Davison (2005)
     rnum <- 1 # iteration number
     bfit <- lapply(1:B, function(b){
         ## resample residuals within each group of (same) covariates,
-        rr <- ave(fit.$res, fit.$covar,
+        rr <- ave(fit$res, fit$covar,
                   FUN=function(r) sample.real(r, size=length(r), replace=TRUE))
 
-        ## compute and put in corresponding exceedances (see Chavez-Demoulin and Davison (2005))
+        ## compute and put in corresponding excesses (see Chavez-Demoulin and Davison (2005))
         ## Note: 1) they use a different reparameterization
         ##       2) solve rr=log(1+xi*y/beta)/xi w.r.t. y
-        y. <- expm1(rr*xi)*beta/xi # reconstruct exceedances from residuals
-        x. <- cbind(fit.$covar, y=y.) # add exceedances
+        y. <- expm1(rr*xi)*beta/xi # reconstruct excesses from residuals
+        x. <- cbind(fit$covar, y=y.) # add excesses
 
         ## progress
         if(boot.progress && progress) cat("Starting fit in bootstrap run ",
                                           b, " of ", B, ":\n", sep="")
 
         ## call gamGPDfit()
-        ## note: threshold=0 => we discard those exceedances which are equal to 0
-        bfit. <- gamGPDfit(x=x., threshold=0, nexceed=NULL, datvar="y",
-                           xiFrhs=xiFrhs, nuFrhs=nuFrhs,
-                           init=gpd.fit(y., threshold=0, show=FALSE)$mle[2:1],
-                           niter=niter, epsxi=epsxi, epsnu=epsnu,
-                           progress=if(!boot.progress) FALSE else progress,
-                           verbose=if(!boot.progress) FALSE else verbose, ...)
+        ## note: threshold=0 => we discard those excesses which are equal to 0
+        bfitobj <- gamGPDfit(x=x., threshold=0, nexc=nexc, datvar="y",
+                             xiFrhs=xiFrhs, nuFrhs=nuFrhs,
+                             init=gpd.fit(y., threshold=0, show=FALSE)$mle[2:1],
+                             niter=niter, include.updates=include.updates,
+                             epsxi=epsxi, epsnu=epsnu,
+                             progress=if(!boot.progress) FALSE else progress,
+                             verbose=if(!boot.progress) FALSE else verbose, ...)
 
         ## progress
         if(boot.progress) if(progress) cat("\n") else setTxtProgressBar(pb, b+1)
 
         ## return fit
-        bfit.
+        bfitobj
     })
 
-    ## return list
-    list(xi=cbind(fit.$xi, sapply(bfit, function(x) x$xi)), # estimated xi
-         beta=cbind(fit.$beta, sapply(bfit, function(x) x$beta)), # estimated beta
-         nu=cbind(fit.$nu, sapply(bfit, function(x) x$nu)), # estimated nu
-         se.xi=cbind(fit.$se.xi, sapply(bfit, function(x) x$se.xi)), # standard error for xi
-         se.nu=cbind(fit.$se.nu, sapply(bfit, function(x) x$se.nu)), # standard error for nu
-         covar=fit.$covar, # covariates (corresponding to xi, beta, etc.; are the same for all bootstrap replications)
-         y=cbind(fit.$y, sapply(bfit, function(x) x$y)), # exceedances
-         res=cbind(fit.$res, sapply(bfit, function(x) x$res)), # residuals
-         MRD=c(list(fit.$MRD), lapply(bfit, function(x) x$MRD)), # mean relative distances between old/new (xi, nu) for all iterations
-         logL=c(fit.$logL, sapply(bfit, function(x) x$logL)), # log-likelihood at the estimated parameters
-         xiObj=c(list(fit.$xiObj), lapply(bfit, function(x) x$xiObj)), # gamObject for estimated xi (return object of mgcv::gam())
-         nuObj=c(list(fit.$nuObj), lapply(bfit, function(x) x$nuObj)), # gamObject for estimated nu (return object of mgcv::gam())
-         xiUpdates=c(list(fit.$xiUpdates), lapply(bfit, function(x) x$xiUpdates)), # updates for xi for each iteration (list of gamObject objects); contains xiObj as last element
-         nuUpdates=c(list(fit.$nuUpdates), lapply(bfit, function(x) x$nuUpdates))) # updates for nu for each iteration (list of gamObject objects); contains nuObj as last element
+    ## return list of length B+1 containing all the gamGPDfit() objects
+    c(fit=list(fit), bfit=bfit)
 }
 
 
-### functions to extract results ###############################################
+### Functions to extract fitted results and for predicting #####################
 
-##' Predict Lambda and compute (pointwise) 1-alpha confidence intervals
-##'
-##' @title Predict Lambda and compute (pointwise) 1-alpha confidence intervals
+##' @title Compute Fitted lambda
 ##' @param x object as returned by gam()
-##' @param newdata 'newdata' object as required by predict(); named data.frame
-##'        of type expand.grid(covar1=1:5, covar2=1:2)
-##' @param alpha significance level
-##' @return a (n, d+3) data.frame where n=nrow(newdata), d=ncol(newdata), and
-##'         the last three columns contain the predicted Lambda and corresponding
-##'         CIs
+##' @return a list with components
+##'         covar: containing the ('minimalized') covariate combinations
+##'         fit:   corresponding fitted values of lambda
 ##' @author Marius Hofert
-LambdaPredict <- function(x, newdata, alpha=0.05)
+lambda.fit <- function(x)
 {
-    LambdaPred <- predict(x, newdata=newdata, se.fit=TRUE) # predict object
-    LambdaPr <- as.numeric(LambdaPred$fit) # predict Lambda
-    LambdaSE <- as.numeric(LambdaPred$se.fit) # standard error
-    qa2 <- qnorm(1-alpha/2) # 1-alpha/2 quantile of N(0,1)
-    data.frame(newdata, # covariates as specified by newdata
-               Lambda=exp(LambdaPr), # predicted Lambda
-               CIlow=exp(LambdaPr-qa2*LambdaSE), # lower CI
-               CIup=exp(LambdaPr+qa2*LambdaSE)) # upper CI
-}
+    ## check x
+    stopifnot(inherits(x, "gam"))
 
-##' Predict xi and beta
-##'
-##' @title Predict xi and beta
-##' @param x object as returned by gamGPDfit()
-##' @param newdata 'newdata' object as required by predict(); named data.frame
-##'        of type expand.grid(covar1=1:5, covar2=1:2)
-##' @return a (n, d+2) data.frame where n=nrow(newdata), d=ncol(newdata), and
-##'         the last two columns contain the corresponding predictions for
-##'         xi and beta
-##' @author Marius Hofert
-##' Note: Standard errors would be available via predict(..., se.fit=TRUE), but
-##'       only for xi (and nu), not for beta.
-xibetaPredict <- function(x, newdata)
-{
-    xiPred <- as.numeric(predict(x$xiObj, newdata=newdata)) # predict xi
-    nuPred <- as.numeric(predict(x$nuObj, newdata=newdata)) # predict nu
-    data.frame(newdata, # covariates as specified by newdata
-               xi=xiPred, # predicted xi
-               beta=exp(nuPred)/(1+xiPred)) # predicted beta
-}
+    ## determine the minimal grid which contains all combinations of covars used for fitting the model
+    covar.nms <- if(length(x$var.summary)>0) names(x$var.summary) else "1" # names of covariates used for fitting (right-hand side of the formula in gam()); NULL if no covariates are used
+    covars <- if(length(x$var.summary)>0) x$model[,covar.nms, drop=FALSE] else NULL # build 'minimal' grid of covariates used for fitting
 
-##' Extract fits of xi and beta, and compute bootstrapped CIs from a gamGPDboot() object
-##'
-##' @title Extract fits of xi and beta, and compute bootstrapped CIs from a gamGPDboot() object
-##' @param x object as returned by gamGPDboot()
-##' @param alpha significance level
-##' @return a (n, d+6) data.frame where n is the number of covariate combinations for
-##'         which there are exceedances (x$covar), d the dimension of x$covar, and
-##'         the columns contain the lower CI for xi, the fitted xi, the upper CI for xi,
-##'         and the same for beta
-##' @author Marius Hofert
-xibetaFitCI <- function(x, alpha=0.05)
-{
-    ## define result object
-    nr <- nrow(x$xi) # = nrow(x$beta) etc.
-    res <- array(NA, dim=c(nr, 6),
-                 dimnames=list(1:nr,
-                               c("xi", "xiCIlow", "xiCIup", "beta", "betaCIlow", "betaCIup"))) # fitted xi's, beta's, and bootstrapped CIs
-
-    ## fit
-    xi <- x$xi # (nr, B+1) matrix; B = number of bootstrap replications
-    beta <- x$beta # (nr, B+1) matrix; B = number of bootstrap replications
-    res[,"xi"] <- xi[,1] # fitted xi
-    res[,"beta"] <- beta[,1] # fitted beta
-
-    ## CIs (derived from fitted values + bootstrapped ones)
-    ## note: this can take some seconds
-    qlow <- function(x, alpha) quantile(x, probs=alpha/2)[[1]] # lower CI
-    qup <- function(x, alpha) quantile(x, probs=1-alpha/2)[[1]] # upper CI
-    res[,"xiCIlow"] <- apply(xi, 1, qlow, alpha=alpha)
-    res[,"xiCIup"] <- apply(xi, 1, qup, alpha=alpha)
-    res[,"betaCIlow"] <- apply(beta, 1, qlow, alpha=alpha)
-    res[,"betaCIup"] <- apply(beta, 1, qup, alpha=alpha)
+    ## determine fitted values for each covariate combination in (the 'minimalized') covars
+    ## => Only combinations of the covariates used for fitting are given and thus
+    ##    there are no fitted values returned for each excess.
+    y <- cbind(covars, lambda=x$fitted.values)
+    frml <- as.formula(paste("lambda ~", paste(rev(covar.nms), collapse=" + ")))
+    covar.lam.hat <- aggregate(frml, data=y, function(z) z[1]) # pick out only first value (they are equal anyways)
+    covar.lam.hat <- covar.lam.hat[,rev(names(covar.lam.hat)), drop=FALSE] # revert again to keep column order [now lambda is in the *first* column]
 
     ## return
-    data.frame(x$covar, res)
+    list(covar = if(ncol(covar.lam.hat) > 1) covar.lam.hat[,-1] else NULL, # covariate combinations used for fitting
+         fit   = covar.lam.hat[,1]) # fitted lambda
 }
 
+##' @title Compute Predicted lambda and Pointwise Asymptotic Two-Sided 1-alpha Confidence Intervals
+##' @param x object as returned by gam()
+##' @param newdata 'newdata' object as required by predict(); named data.frame
+##'        of type expand.grid(covar1=, covar2=) with at least the covariates
+##'        used for fitting with gam(); if more are provided, predict() returns
+##'        values which are equal uniformly over all of these additional
+##'        covariates. Each covariate which appears when fitting with gam() can
+##'        have more values than were actually used in gam() (for example,
+##'        half-years). In this case predict() 'interpolates' correctly with the
+##'        fitted model.
+##' @param alpha significance level
+##' @return a list with components
+##'         covar:   containing the covariate combinations as provided by newdata
+##'         predict: the predicted lambda
+##'         CI.low:  lower CI [based on *predicted* values]
+##'         CI.up:   upper CI [based on *predicted* values]
+##' @author Marius Hofert
+lambda.predict <- function(x, newdata=NULL, alpha=0.05)
+{
+    ## check x
+    stopifnot(inherits(x, "gam"))
+
+    ## default for newdata
+    if(is.null(newdata)) { # choose useful default (exactly the covariates used for fitting but *all* combis of such)
+	if(length(x$var.summary) > 0) {
+            covar.nms <- names(x$var.summary) # names of covariates used for fitting (right-hand side of the formula in gam())
+            ## determine the minimal grid which contains all combinations of covars used for fitting the model
+            covars <- x$model[,covar.nms, drop=FALSE] # build 'minimal' grid of covariates used for fitting
+            lam.covars <- lapply(1:ncol(covars), function(j) sort(unique(covars[,j]))) # determine levels
+            names(lam.covars) <- colnames(covars) # put in names
+            newdata <- expand.grid(rev(lam.covars))[,rev(seq_len(length(lam.covars))), drop=FALSE] # expand grid with reverted covariates (and reverting back) to guarantee the same sorting order of rows as covars
+	## check newdata
+            if(!all(covar.nms %in% colnames(newdata)))
+                stop("'newdata' requires at least the covariates used for fitting lambda via gam()")
+        } else {
+            newdata <- data.frame(lambda.dummy.covar=1)
+        }
+    }
+
+    ## predict (note: can contain half-years etc.)
+    pred <- predict(x, newdata=newdata, se.fit=TRUE) # predict object
+    lam.pred <- as.numeric(pred$fit) # predicted values for lambda
+    lam.se <- as.numeric(pred$se.fit) # standard error
+    qa2 <- qnorm(1-alpha/2) # 1-alpha/2 quantile of N(0,1)
+
+    ## return
+    list(covar   = if(length(x$var.summary) > 0) newdata else NULL, # covariate combinations as specified by newdata
+         predict = exp(lam.pred), # predicted lambda
+         CI.low  = exp(lam.pred-qa2*lam.se), # lower CI [based on *predicted* values]
+         CI.up   = exp(lam.pred+qa2*lam.se)) # upper CI [based on *predicted* values]
+}
+
+##' @title Compute Fitted GPD Parameters xi and beta and Bootstrapped Pointwise Two-Sided
+##'        1-alpha Confidence Intervals
+##' @param x object as returned by gamGPDboot()
+##' @param alpha significance level
+##' @return a list with components
+##'         xi:   a list with components
+##'               covar:  a data.frame containing the 'minimal' covariate combinations
+##'                       for the covariates used for fitting xi
+##'               fit:    corresponding fitted xi's
+##'               CI.low: corresponding lower CIs
+##'               CI.up:  corresponding upper CIs
+##'               boot:   a matrix containing the corresponding bootstrapped xi's
+##'         beta: same as xi, just for beta.
+##' @author Marius Hofert
+##' Note: Standard errors as for lambda would be available via predict(..., se.fit=TRUE),
+##'       but only for xi and nu, not for beta. That's why we need bootstrapped values
+##'       here (and thus only have CIs for the fitted values)
+GPD.fit <- function(x, alpha=0.05)
+{
+    ## basic check (B = number of bootstrap replicates; nr = number of rows of the data set
+    ## provided to gamGPDboot())
+    xi.mat.   <- sapply(x, `[[`, "xi") # pick out all B+1 vectors of xi; (nr, B+1) matrix
+    beta.mat. <- sapply(x, `[[`, "beta") # pick out all B+1 vectors of beta; (nr, B+1) matrix
+    stopifnot(dim(xi.mat.)==dim(beta.mat.))
+
+    ## Note: Now these matrices typically have a huge number of rows nr. For each
+    ##       combination of covariates, they contain the same fitted value for
+    ##       each loss. This is 'overhead' we don't want. We therefore now pick
+    ##       out the fitted values for each unique combination of covariates which was
+    ##       originally used for fitting.
+
+    ## determine the minimal grid which contains all *available* combinations of
+    ## covars used for fitting xi and nu (and beta) but not more
+    ## (in particular not for each excess)
+    covars. <- x[[1]]$covar # 'long' version (covariate combination for each excesses, too)
+    covar.nms <- if(length(covars.)>0) names(covars.) else "1" # names of covariates used for fitting xi and nu (or "1" if not depending on covariates)
+    y <- cbind(covars., index=seq_len(nrow(covars.))) # dummy data set ('long' version)
+    frml <- as.formula(paste("index ~", paste(rev(covar.nms), collapse=" + "))) # formula [with reverted covariates to guarantee the same sorting order of rows (cols are then reverted but we don't care here)]
+    covar.index <- aggregate(frml, data=y, FUN=function(z) z[1])[,"index"] # = 1 if y is list()
+    covars <- if(length(covar.index)==1) NULL else y[covar.index, covar.nms, drop=FALSE] # 'minimal' version (or NULL for no covariates)
+
+    ## determine further minimalized version for xi (possibly less combinations than beta)
+    xi.covars. <- x[[1]]$xi.covar
+    xi.covar.nms <- if(length(xi.covars.)>0) names(xi.covars.) else "1" # names of covariates used for fitting xi (or "1" if not depending on covariates)
+    xi.frml <- as.formula(paste("index ~", paste(rev(xi.covar.nms), collapse=" + "))) # formula [see above]
+    xi.covar.index <- aggregate(xi.frml, data=y, FUN=function(z) z[1])[,"index"] # pick out only first value (they are equal anyways)
+    xi.covars <- if(length(xi.covar.index)==1) NULL else y[xi.covar.index, xi.covar.nms, drop=FALSE] # 'minimal' version (or NULL for no covariates)
+
+    ## determine fitted values for each covariate combination in (the 'minimalized') covars
+    xi.mat <- xi.mat.[xi.covar.index,, drop=FALSE] # minimal number of rows
+    rownames(xi.mat) <- NULL
+    beta.mat <- beta.mat.[covar.index,, drop=FALSE] # minimal number of rows
+    rownames(beta.mat) <- NULL
+    ## compute CIs (derived from fitted values + bootstrapped ones)
+    ## 'na.rm=TRUE' is for those covariate combinations where there is no data (=> the whole row is NA)
+    xi.CI   <- t(apply(xi.mat, 1, quantile, probs=c(alpha/2, 1-alpha/2), na.rm=TRUE, names=FALSE)) # CIs (low, up) for xi; (nrow(xi.mat), 2) matrix
+    beta.CI <- t(apply(beta.mat, 1, quantile, probs=c(alpha/2, 1-alpha/2), na.rm=TRUE, names=FALSE)) # CIs (low, up) for beta; (nrow(beta.mat), 2) matrix
+
+    ## result
+    list(xi   = list(covar  = xi.covars, # covariate combinations used for fitting (or NULL)
+                     fit    = xi.mat[,1], # fitted xi
+                     CI.low = xi.CI[,1], # lower CI
+                     CI.up  = xi.CI[,2], # upper CI
+                     boot   = xi.mat[,-1]), # bootstrapped xi's
+         beta = list(covar  = covars, # covariate combinations used for fitting (or NULL)
+                     fit    = beta.mat[,1], # fitted beta
+                     CI.low = beta.CI[,1], # lower CI
+                     CI.up  = beta.CI[,2], # upper CI
+                     boot   = beta.mat[,-1])) # bootstrapped beta's
+}
+
+##' @title Compute Predicted GPD Parameters xi and beta
+##' @param x object as returned by gamGPDboot()
+##' @param xi.newdata 'newdata' object for xi as required by predict(); named data.frame
+##'        of type expand.grid(covar1=, covar2=) with at least the covariates
+##'        used for fitting xi with gam(); if more are provided, predict() returns
+##'        values which are equal uniformly over all of these additional
+##'        covariates. Each covariate which appears when fitting with gam() can
+##'        have more values than were actually used in gam() (for example,
+##'        half-years). In this case predict() 'interpolates' correctly with the
+##'        fitted model.
+##' @param beta.newdata similar to xi.newdata. Since beta is estimated based on xi
+##'        (and nu), beta.newdata must contain at least the covariates of xi.newdata.
+##' @return a list with components
+##'         xi:   a list with components
+##'               covar:   a data.frame containing the covariate combinations as provided by xi.newdata
+##'               predict: the predicted xi's
+##'         beta: same as xi, just for beta; predicted values are based on beta.newdata
+##' @author Marius Hofert
+GPD.predict <- function(x, xi.newdata=NULL, beta.newdata=NULL)
+{
+    ## default for xi.newdata and beta.newdata
+    if(is.null(xi.newdata)) { # choose useful default (covariates used for fitting but *all* combis of such)
+        xi.newdata <- if(length(x[[1]]$xi.covar)>0) {
+            expand.grid(rev(x[[1]]$xi.covar))[,rev(seq_len(length(x[[1]]$xi.covar))), drop=FALSE]
+        } else {
+            data.frame(xi.dummy.covar=1)
+        }
+    }
+    if(is.null(beta.newdata)) {
+        fulllist <- c(x[[1]]$xi.covar, x[[1]]$nu.covar) # some may be duplicate
+        sublist <- fulllist[unique(names(fulllist))] # pick out maximal unique subset
+        beta.newdata <- if(length(x[[1]]$xi.covar)>0 || length(x[[1]]$nu.covar)>0) {
+            expand.grid(rev(sublist))[,rev(seq_len(length(sublist))), drop=FALSE] # build grid
+        } else {
+            data.frame(beta.dummy.covar=1)
+        }
+    }
+
+    ## check xi.newdata and beta.newdata (true for the default)
+    if(!all(names(x[[1]]$xi.covar) %in% colnames(xi.newdata)))
+        stop("'xi.newdata' requires at least the covariates used for fitting xi via gamGPDfit()")
+    if(!all(names(x[[1]]$covar) %in% colnames(beta.newdata)))
+       stop("'beta.newdata' requires at least the covariates used for fitting beta via gamGPDfit()")
+    ## => implicitly also checks that beta.newdata contains the covariates of both xi and nu
+
+    ## predict
+    ## note: - *.newdata can be of different length than fitted values
+    ##         (can contain half-years etc.)
+    ##       - xi.newdata and beta.newdata can be of different length
+    ##         (depending on the covariates used for fitting, for example)
+    xi.pred      <- as.numeric(predict(x[[1]]$xiObj, newdata=xi.newdata)) # predict xi (for its own)
+    xi.pred.beta <- as.numeric(predict(x[[1]]$xiObj, newdata=beta.newdata)) # predict xi on beta.newdata
+    nu.pred.beta <- as.numeric(predict(x[[1]]$nuObj, newdata=beta.newdata)) # predict nu on beta.newdata
+    ## note: - there is no betaObj so we can't predict beta directly (only through nu)
+    ##       - we predict xi and nu both on beta.newdata since that's what we need
+    ##         to predict beta (see below)
+
+    ## result
+    list(xi   = list(covar   = if(length(x[[1]]$xi.covar)>0) xi.newdata else NULL, # covariate combinations as specified by newdata
+                     predict = xi.pred), # predicted xi
+         beta = list(covar   = if(length(x[[1]]$xi.covar)>0 || length(x[[1]]$nu.covar)>0)
+                                   beta.newdata else NULL, # covariate combinations as specified by newdata
+                     predict = exp(nu.pred.beta)/(1+xi.pred.beta))) # predicted beta
+}

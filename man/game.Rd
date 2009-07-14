@@ -14,14 +14,14 @@
   Davison (2005).
 }
 \usage{
-  gamGPDfit(x, threshold, nexceed=NULL, datvar, xiFrhs, nuFrhs,
-    init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
-    niter=128, epsxi=1e-05, epsnu=1e-05,
-    progress=TRUE, verbose=FALSE, \dots)
-  gamGPDboot(x, B, threshold, nexceed=NULL, datvar, xiFrhs, nuFrhs,
-             init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
-             niter=128, epsxi=1e-5, epsnu=1e-5,
-             boot.progress=TRUE, progress=FALSE, verbose=FALSE, debug=FALSE, \dots)
+gamGPDfit(x, threshold, nexc=NULL, datvar, xiFrhs, nuFrhs,
+          init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
+          niter=32, include.updates=FALSE, epsxi=1e-05, epsnu=1e-05,
+          progress=TRUE, verbose=FALSE, \dots)
+gamGPDboot(x, B, threshold, nexc=NULL, datvar, xiFrhs, nuFrhs,
+           init=gpd.fit(x[, datvar], threshold=threshold, show=FALSE)$mle[2:1],
+           niter=32, include.updates=FALSE, epsxi=1e-5, epsnu=1e-5,
+           boot.progress=TRUE, progress=FALSE, verbose=FALSE, debug=FALSE, \dots)
 }
 \arguments{
   \item{x}{data.frame containing the losses (in some component; can be
@@ -29,8 +29,8 @@
   contain the covariates).}
   \item{B}{number of bootstrap replications.}
   \item{threshold}{threshold of the peaks-over-threshold (POT)
-    method. Above this value, loss (exceedances) are considered for the model.}
-  \item{nexceed}{number of exceedances. This can be used to determine}
+    method.}
+  \item{nexc}{number of excesses. This can be used to determine}
   \item{datvar}{name of the data column in \code{x} which contains the
      the data to be modeled.}
   \item{xiFrhs}{right-hand side of the formula for \eqn{\xi}{xi} in
@@ -39,14 +39,19 @@
     the \code{gam()} call for fitting \eqn{\nu}{nu}.}
   \item{init}{bivariate vector containing initial values
     for \eqn{(\xi, \beta)}{(xi, beta)}.}
-  \item{niter}{maximal number of iterations in the backfitting algorithm.}
+  \item{niter}{maximal number of iterations in the backfitting
+    algorithm.}
+  \item{include.updates}{\code{\link{logical}} indicating whether
+  updates for xi and nu are returned as well (note: this might lead to
+  objects of large size).}
   \item{epsxi}{epsilon for stop criterion for \eqn{\xi}{xi}.}
   \item{epsnu}{epsilon for stop criterion for \eqn{\nu}{nu}.}
   \item{boot.progress}{\code{\link{logical}} indicating
     whether progress information about \code{gamGPDboot()} is displayed.}
   \item{progress}{\code{\link{logical}} indicating whether progress information about
     \code{gamGPDfit()} is displayed. For \code{gamGPDboot()},
-  \code{progress} is only passed to \code{gamGPDfit()} if \code{boot.progress==TRUE}.}
+    \code{progress} is only passed to \code{gamGPDfit()} in the case that
+    \code{boot.progress==TRUE}.}
   \item{verbose}{\code{\link{logical}} indicating whether additional
     information (in case of undesired behavior) is printed. For \code{gamGPDboot()},
     \code{progress} is only passed to \code{gamGPDfit()} if
@@ -57,7 +62,7 @@
     called internally; see the source code of \code{gamGPDfitUp()}).}
 }
 \details{
-  The function \code{gamGPDfit()} fits the parameters \eqn{\xi}{xi} and
+  \code{gamGPDfit()} fits the parameters \eqn{\xi}{xi} and
   \eqn{\beta}{beta} of the generalized Pareto distribution
   \eqn{\mathrm{GPD}(\xi,\beta)}{GPD(xi,beta)} depending on covariates in
   a non- or semiparametric way. The distribution function is given by
@@ -83,11 +88,11 @@
   regression splines. For more details, see the references and the source
   code.
 
-  The function \code{gamGPDboot()} first fits the GPD parameters via
+  \code{gamGPDboot()} first fits the GPD parameters via
   \code{gamGPDfit()}. It then conducts the post-blackend bootstrap of
   Chavez-Demoulin and Davison (2005). To this end, it computes the
   residuals, resamples them (\code{B} times), reconstructs the
-  corresponding exceedances, and refits the GPD parameters via
+  corresponding excesses, and refits the GPD parameters via
   \code{gamGPDfit()} again.
 }
 \value{
@@ -102,9 +107,11 @@
     \item{\code{se.nu}:}{standard error for \eqn{\nu}{nu} ((possibly
       adjusted) second-order derivative of the reparameterized
       log-likelihood with respect to \eqn{\nu}{nu}) multiplied by -1;}
-    \item{\code{covar}:}{covariates (corresponding to \code{xi},
-      \code{beta} etc.;}
-    \item{\code{y}:}{vector of exceedances over the threshold;}
+    \item{\code{xi.covar}:}{(unique) covariates for \eqn{\xi}{xi};}
+    \item{\code{nu.covar}:}{(unique) covariates for \eqn{\nu}{nu};}
+    \item{\code{covar}:}{available covariate combinations used for
+      fitting \eqn{\beta}{beta}(\eqn{\xi}{xi}, \eqn{\nu}{nu});}
+    \item{\code{y}:}{vector of excesses (exceedances minus threshold);}
     \item{\code{res}:}{residuals;}
     \item{\code{MRD}:}{mean relative distances between for all
       iterations, calculated between old parameters \eqn{(\xi, \nu)}{(xi,
@@ -115,24 +122,21 @@
     \eqn{\xi}{xi} (returned by \code{mgcv::gam()});}
     \item{\code{nuObj}:}{\R object of type \code{gamObject} for estimated
     \eqn{\nu}{nu} (returned by \code{mgcv::gam()});}
-    \item{\code{xiUpdates}:}{updates for \eqn{\xi}{xi} for each
+    \item{\code{xiUpdates}:}{if \code{include.updates} is
+      \code{\link{TRUE}}, updates for \eqn{\xi}{xi} for each
       iteration. This is a list of \R objects of type \code{gamObject}
       which contains \code{xiObj} as last element;}
-    \item{\code{nuUpdates}:}{updates for \eqn{\nu}{nu} for each
+    \item{\code{nuUpdates}:}{if \code{include.updates} is
+      \code{\link{TRUE}}, updates for \eqn{\nu}{nu} for each
       iteration. This is a list of \R objects of type \code{gamObject}
       which contains \code{nuObj} as last element;}
   }
 
-  \code{gamGPDboot()} returns a list with components names as for
-  \code{gamGPDfit()}. However, all components now contain the results of
-  the initial fit via \code{gamGPDfit()} in their first components and
-  the results for each replication of the post-blackend bootstrap in the
-  remaining components. So, for example, \code{xi} is now a matrix whose
-  first column contains the fitted \eqn{\xi}{xi}, and the remaining
-  columns contain the bootstrapped ones. Note that in contrast to
-  \code{gamGPDfit()}, return values are now vectors, vectors are now
-  matrices, and so on. Since the covariates remain the same,
-  \code{covar} is just the same as for \code{gamGPDfit()}.
+  \code{gamGPDboot()} returns a list of length \code{B+1} where the
+  first component contains the results of
+  the initial fit via \code{gamGPDfit()} and the other \code{B}
+  components contain the results for each replication of the
+  post-blackend bootstrap.
 }
 \author{Marius Hofert, Valerie Chavez-Demoulin.}
 \references{
