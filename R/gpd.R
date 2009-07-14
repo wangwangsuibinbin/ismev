@@ -231,7 +231,7 @@ function(a, u, la, n, npy, mat, dat, xdat)
 	# d <- cbind(d1, d2, d3)
 	d <- t( gpd.rl.gradient( a=a, m=m))
 	mat <- matrix(c((la * (1 - la))/n, 0, 0, 0, mat[1, 1], mat[1, 2], 0, 
-		mat[2, 1], mat[2, 2]), nc = 3)
+		mat[2, 1], mat[2, 2]), ncol = 3)
 	v <- apply(d, 1, q.form, m = mat)
 	plot(m/npy, q, log = "x", type = "n", xlim = c(0.1, max(m)/npy), ylim
 		 = c(u, max(xdat, q[q > u - 1] + 1.96 * sqrt(v)[q > u - 1])), 
@@ -257,10 +257,10 @@ function(a, u, dat)
 # function called by gpd.diag
 # produces histogram and density plot
 #
-	h <- hist(dat, prob = TRUE, plot = FALSE)
+	h <- hist(dat, plot = FALSE)
 	x <- seq(u, max(h$breaks), length = 100)
 	y <- gpd.dens(a, u, x)
-	hist(dat, prob = TRUE, ylim = c(0, max(max(h$density), max(y))), xlab = "x", ylab = "f(x)", 
+	hist(dat, freq = FALSE, ylim = c(0, max(max(h$density), max(y))), xlab = "x", ylab = "f(x)", 
 		main = "Density Plot")
 	lines(x, y, col = 4)
 }

@@ -207,7 +207,7 @@ function(a, dat)
 # Plots histogram of data and fitted density
 # for output of gev.fit stored in z
 #
-	h <- hist(dat, prob = TRUE, plot = FALSE)
+	h <- hist(dat, plot = FALSE)
 	if(a[3] < 0) {
 		x <- seq(min(h$breaks), min(max(h$breaks), (a[1] - a[2]/a[3] - 
 			0.001)), length = 100)
@@ -217,7 +217,7 @@ function(a, dat)
 			breaks), length = 100)
 	}
 	y <- gev.dens(a, x)
-	hist(dat, prob = TRUE, ylim = c(0, max(max(h$density),max(y))), xlab = "z", ylab = "f(z)", 
+	hist(dat, freq = FALSE, ylim = c(0, max(max(h$density),max(y))), xlab = "z", ylab = "f(z)", 
 		main = "Density Plot")
 	points(dat, rep(0, length(dat)))
 	lines(x, y)
