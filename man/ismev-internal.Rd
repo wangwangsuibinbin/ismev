@@ -14,6 +14,9 @@
 \alias{gum.rl}
 \alias{gpd.rl}
 
+\alias{gev.rl.gradient}
+\alias{gpd.rl.gradient}
+
 \alias{gev.his}
 \alias{gpd.his}
 

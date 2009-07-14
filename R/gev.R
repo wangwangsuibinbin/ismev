@@ -139,6 +139,33 @@ function(a, dat)
 	abline(0, 1, col = 4)
 }
 
+"gev.rl.gradient" <-
+function (a, p) 
+{
+    # scale <- z$mle[2]
+    # shape <- z$mle[3]
+    scale <- a[2]
+    shape <- a[3]
+    if (shape < 0) 
+        zero.p <- p == 0
+    else zero.p <- logical(length(p))
+    out <- matrix(NA, nrow = 3, ncol = length(p))
+    out[1, ] <- 1
+    if (any(zero.p)) {
+        out[2, zero.p & !is.na(zero.p)] <- rep(-shape^(-1), sum(zero.p, 
+            na.rm = TRUE))
+        out[3, zero.p & !is.na(zero.p)] <- rep(scale * (shape^(-2)), 
+            sum(zero.p, na.rm = TRUE))
+    }
+    if (any(!zero.p)) {
+        yp <- -log(1 - p[!zero.p])
+        out[2, !zero.p] <- -shape^(-1) * (1 - yp^(-shape))
+        out[3, !zero.p] <- scale * (shape^(-2)) * (1 - yp^(-shape)) - 
+            scale * shape^(-1) * yp^(-shape) * log(yp)
+    }
+    return(out)
+}
+
 "gev.rl"<-
 function(a, mat, dat)
 {
@@ -157,10 +184,11 @@ function(a, mat, dat)
 	f <- c(seq(0.01, 0.09, by = 0.01), 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 
 		0.8, 0.9, 0.95, 0.99, 0.995, 0.999)
 	q <- gevq(a, 1 - f)
-	d1 <- (gevq(a1, 1 - f) - q)/eps
-	d2 <- (gevq(a2, 1 - f) - q)/eps
-	d3 <- (gevq(a3, 1 - f) - q)/eps
-	d <- cbind(d1, d2, d3)
+	# d1 <- (gevq(a1, 1 - f) - q)/eps
+	# d2 <- (gevq(a2, 1 - f) - q)/eps
+	# d3 <- (gevq(a3, 1 - f) - q)/eps
+	# d <- cbind(d1, d2, d3)
+	d <- t( gev.rl.gradient( a=a, p=1-f))
 	v <- apply(d, 1, q.form, m = mat)
 	plot(-1/log(f), q, log = "x", type = "n", xlim = c(0.1, 1000), ylim = c(
 		min(dat, q), max(dat, q)), xlab = "Return Period", ylab = 

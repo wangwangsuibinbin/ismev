@@ -184,6 +184,29 @@ function(a, u, dat)
 	abline(0, 1, col = 4)
 }
 
+"gpd.rl.gradient" <-
+function (a, m) 
+{
+    # 'a' is a numeric vector of length 4 containing Pr(X>u) and the 
+    # estimated scale and shape parameters.
+    # a <- c(z$rate, z$mle)
+    if (length(a) > 3) 
+        stop("gpd.rl.gradient: Covariates not allowed.")
+    out <- matrix(0, nrow = 3, ncol = length(m))
+    if (a[3] == 0) {
+        out[1, ] <- a[2]/a[1]
+        out[2, ] <- log(m * a[1])
+    }
+    else {
+        out[1, ] <- a[2] * m^(a[3]) * a[1]^(a[3] - 1)
+        out[2, ] <- a[3]^(-1) * ((m * a[1])^(a[3]) - 1)
+        out[3, ] <- -a[2] * a[3]^(-2) * ((m * a[1])^(a[3]) - 
+            1) + a[2] * a[3]^(-1) * (m * a[1])^(a[3]) * log(m * 
+            a[1])
+    }
+    return(out)
+}
+
 "gpd.rl"<-
 function(a, u, la, n, npy, mat, dat, xdat)
 {
@@ -202,10 +225,11 @@ function(a, u, la, n, npy, mat, dat, xdat)
 	jj <- seq(-1, 3.75 + log10(npy), by = 0.1)
 	m <- c(1/la, 10^jj)
 	q <- gpdq2(a[2:3], u, la, m)
-	d1 <- (gpdq2(a1[2:3], u, la, m) - q)/eps
-	d2 <- (gpdq2(a2[2:3], u, la, m) - q)/eps
-	d3 <- (gpdq2(a3[2:3], u, la, m) - q)/eps
-	d <- cbind(d1, d2, d3)
+	# d1 <- (gpdq2(a1[2:3], u, la, m) - q)/eps
+	# d2 <- (gpdq2(a2[2:3], u, la, m) - q)/eps
+	# d3 <- (gpdq2(a3[2:3], u, la, m) - q)/eps
+	# d <- cbind(d1, d2, d3)
+	d <- t( gpd.rl.gradient( a=a, m=m))
 	mat <- matrix(c((la * (1 - la))/n, 0, 0, 0, mat[1, 1], mat[1, 2], 0, 
 		mat[2, 1], mat[2, 2]), nc = 3)
 	v <- apply(d, 1, q.form, m = mat)
