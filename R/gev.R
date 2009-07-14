@@ -217,7 +217,7 @@ function(a, dat)
 			breaks), length = 100)
 	}
 	y <- gev.dens(a, x)
-	hist(dat, prob = TRUE, ylim = c(0, max(y)), xlab = "z", ylab = "f(z)", 
+	hist(dat, prob = TRUE, ylim = c(0, max(max(h$density),max(y))), xlab = "z", ylab = "f(z)", 
 		main = "Density Plot")
 	points(dat, rep(0, length(dat)))
 	lines(x, y)

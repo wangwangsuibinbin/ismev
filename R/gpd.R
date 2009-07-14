@@ -260,7 +260,7 @@ function(a, u, dat)
 	h <- hist(dat, prob = TRUE, plot = FALSE)
 	x <- seq(u, max(h$breaks), length = 100)
 	y <- gpd.dens(a, u, x)
-	hist(dat, prob = TRUE, ylim = c(0, max(y)), xlab = "x", ylab = "f(x)", 
+	hist(dat, prob = TRUE, ylim = c(0, max(max(h$density), max(y))), xlab = "x", ylab = "f(x)", 
 		main = "Density Plot")
 	lines(x, y, col = 4)
 }
