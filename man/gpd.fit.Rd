@@ -47,6 +47,10 @@ gpd.fit(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL,
   within the generalized linear models are (at least approximately)
   centered and scaled (i.e.\ the columns of \code{ydat} should be
   approximately centered and scaled).
+
+  The form of the GP model used follows Coles (2001) Eq (4.7).  In particular,
+  the shape parameter is defined so that positive values imply a heavy tail
+  and negative values imply a bounded upper value.
 }
 \value{
   A list containing the following components. A subset of these
@@ -54,7 +58,12 @@ gpd.fit(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL,
   \code{TRUE}, then assuming that successful convergence is
   indicated, the components \code{nexc}, \code{nllh},
   \code{mle}, \code{rate} and \code{se} are always printed.
-  
+ 
+  \item{nexc}{single numeric giving the number of threshold exceedances.}
+  \item{nllh}{nsingle umeric giving the negative log-likelihood value.} 
+  \item{mle}{numeric vector giving the MLE's for the scale and shape parameters, resp.}
+  \item{rate}{single numeric giving the estimated probability of exceeding the threshold.}
+  \item{se}{numeric vector giving the standard error estiamtes for the scale and shape parameter estimates, resp.}
   \item{trans}{An logical indicator for a non-stationary fit.}
   \item{model}{A list with components \code{sigl} and \code{shl}.}
   \item{link}{A character vector giving inverse link functions.}
@@ -78,6 +87,9 @@ gpd.fit(xdat, threshold, npy = 365, ydat = NULL, sigl = NULL,
     \code{xdat}).}
   \item{npy}{The number of observations per year/block.}
   \item{xdata}{The data that has been fitted.} 
+}
+\references{
+Coles, S., 2001.  An Introduction to Statistical Modeling of Extreme Values.  Springer-Verlag, London, U.K., 208pp.
 }
 
 \seealso{\code{\link{gpd.diag}}, \code{\link{optim}},

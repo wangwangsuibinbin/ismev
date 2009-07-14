@@ -41,6 +41,15 @@
 
 \alias{q.form}
 
+\alias{DrLogL}
+\alias{LambdaPredict}
+\alias{adjustD2}
+\alias{gamGPDfitUp}
+\alias{rLogL}
+\alias{sample.real}
+\alias{xibetaFitCI}
+\alias{xibetaPredict}
+
 \title{Internal Functions}
 
 \description{

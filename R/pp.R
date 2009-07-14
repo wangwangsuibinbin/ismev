@@ -46,12 +46,17 @@ function(xdat, threshold, npy = 365, ydat = NULL, mul = NULL, sigl = NULL, shl =
 	u <- rep(threshold, length.out = n)
 	if(length(unique(u)) > 1) z$trans <- TRUE
 	uInd <- xdat > u
+	lrate <- sum(uInd)/n
     	xdatu <- xdat[uInd]
 	# xdatu <- xdat[xdat > u]
 	# xind <- (1:n)[xdat > u]
 	# u <- u[xind]
-	in2 <- sqrt(6 * var(xdat))/pi
-	in1 <- mean(xdat) - 0.57722 * in2
+	in2 <- sqrt(6 * var(xdatu))/pi
+	in1 <- mean(xdatu) - 0.57722 * in2
+	if(is.null(shinit)) in3 <- 1e-8
+	else in3 <- shinit
+	in2 <- exp(log(in2) + in3*log(lrate))
+	in1 <- threshold - (in2/in3)*(lrate^(-in3) - 1)
 	if(is.null(mul)) {
 		mumat <- as.matrix(rep(1, length(xdat)))
 		if( is.null( muinit)) muinit <- in1

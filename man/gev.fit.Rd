@@ -39,6 +39,10 @@ gev.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL,
     \code{optim}.}
 }
 \details{
+  The form of the GEV used is that of Coles (2001) Eq (3.2).  Specifically,
+  positive values of the shape parameter imply a heavy tail, and negative values
+  imply a bounded upper tail.
+
   For non-stationary fitting it is recommended that the covariates
   within the generalized linear models are (at least approximately)
   centered and scaled (i.e.\ the columns of \code{ydat} should be
@@ -60,7 +64,10 @@ gev.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL,
   \code{TRUE}, then assuming that successful convergence is
   indicated, the components \code{nllh}, \code{mle} and \code{se}
   are always printed.
-  
+
+  \item{nllh}{single numeric giving the negative log-likelihood value.}  
+  \item{mle}{numeric vector giving the MLE's for the location, scale and shape parameters, resp.}
+  \item{se}{numeric vector giving the standard errors for the MLE's for the location, scale and shape parameters, resp.}
   \item{trans}{An logical indicator for a non-stationary fit.}
   \item{model}{A list with components \code{mul}, \code{sigl}
     and \code{shl}.}
@@ -77,6 +84,10 @@ gev.fit(xdat, ydat = NULL, mul = NULL, sigl = NULL, shl = NULL,
   \item{vals}{A matrix with three columns containing the maximum
     likelihood estimates of the location, scale and shape parameters
     at each data point.}  
+}
+
+\references{
+Coles, S., 2001.  An Introduction to Statistical Modeling of Extreme Values.  Springer-Verlag, London, U.K., 208pp.
 }
 
 \seealso{\code{\link{gev.diag}}, \code{\link{optim}},
