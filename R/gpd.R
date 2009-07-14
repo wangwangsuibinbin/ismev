@@ -3,7 +3,7 @@
 # gpd.his  gpdf  gpdq  gpdq2  gpd.dens  gpd.profxi  gpd.prof
 
 "gpd.fitrange"<-
-function(data, umin, umax, nint = 10, show = FALSE)
+function(data, umin, umax, nint = 10, show = FALSE, ...)
 {
 #
 # computes mle's in gpd model, adjusted for threshold, 
@@ -12,7 +12,7 @@ function(data, umin, umax, nint = 10, show = FALSE)
 	m <- s <- up <- ul <- matrix(0, nrow = nint, ncol = 2)
 	u <- seq(umin, umax, length = nint)
 	for(i in 1:nint) {
-		z <- gpd.fit(data, u[i], show = show)
+		z <- gpd.fit(data, u[i], show = show, ...)
 		m[i,  ] <- z$mle
 		m[i, 1] <- m[i, 1] - m[i, 2] * u[i]
 		d <- matrix(c(1,  - u[i]), ncol = 1)

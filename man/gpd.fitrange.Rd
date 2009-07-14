@@ -8,7 +8,7 @@
   which aid the selection of a threshold are produced.
 }
 \usage{
-gpd.fitrange(data, umin, umax, nint = 10, show = FALSE)
+gpd.fitrange(data, umin, umax, nint = 10, show = FALSE, ...)
 }
 \arguments{
   \item{data}{A numeric vector of data to be fitted.}
@@ -17,6 +17,7 @@ gpd.fitrange(data, umin, umax, nint = 10, show = FALSE)
   \item{nint}{The number of fitted models.}
   \item{show}{Logical; if \code{TRUE}, print details of each
     fit.}
+  \item{...}{Optional arguments to \code{gpd.fit}.}
 }
 \value{
   Two graphs showing maximum likelihood estimates and confidence

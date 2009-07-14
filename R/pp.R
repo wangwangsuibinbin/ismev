@@ -3,7 +3,7 @@
 # ppf  ppq  ppp
 
 "pp.fitrange"<-
-function(data, umin, umax, npy = 365, nint = 10, show = FALSE)
+function(data, umin, umax, npy = 365, nint = 10, show = FALSE, ...)
 {
 #
 # produces estimates and 95% confidence intervals
@@ -12,7 +12,7 @@ function(data, umin, umax, npy = 365, nint = 10, show = FALSE)
         m <- s <- up <- ul <- matrix(0, nrow = nint, ncol = 3)
 	u <- seq(umin, umax, length = nint)
 	for(i in 1:nint) {
-		z <- pp.fit(data, u[i], npy, show = show)
+		z <- pp.fit(data, u[i], npy, show = show, ...)
 		m[i,  ] <- z$mle
 		s[i,  ] <- z$se
 		up[i,  ] <- z$mle + 1.96 * z$se

@@ -8,7 +8,7 @@
   which aid the selection of a threshold are produced.
 }
 \usage{
-pp.fitrange(data, umin, umax, npy = 365, nint = 10, show = FALSE)
+pp.fitrange(data, umin, umax, npy = 365, nint = 10, show = FALSE, ...)
 }
 \arguments{
   \item{data}{A numeric vector of data to be fitted.}
@@ -18,6 +18,7 @@ pp.fitrange(data, umin, umax, npy = 365, nint = 10, show = FALSE)
   \item{nint}{The number of fitted models.}
   \item{show}{Logical; if \code{TRUE}, print details of each
     fit.}
+   \item{...}{Optional arguments to \code{pp.fit}.}
 }
 \value{
   Three graphs showing maximum likelihood estimates and confidence
