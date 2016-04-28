@@ -1,6 +1,6 @@
-1af9702248d8a1b28ab5dd28f7d0bc89 *DESCRIPTION
+27d66fe28e8733dcc9a33449b2f01441 *DESCRIPTION
 f2ae896bf57c4291733abf4347b52d7e *INDEX
-2ac07a63e7bf283439e92cd717762b42 *NAMESPACE
+423bb9e0f44edd5c8f576cb0a53b0967 *NAMESPACE
 60e2a79e507f22fd631b09b0db4a6644 *R/game.R
 588e85249cd1a8b0fd3f2adbf47ef6ab *R/gev.R
 b92724346a9ac28bffa5255a4c174334 *R/gpd.R
@@ -15,9 +15,9 @@ eb77f037faec1dd3efd3f00870265ffd *data/euroex.rda
 d6b80c5ac7ed20b905e50edeeea29fb8 *data/exchange.rda
 06026f664f08fe0b40978f606338da04 *data/fremantle.rda
 63f46af53f4d8edd70858eef5efe2fd8 *data/glass.rda
-6c7411f2efb2de112556b15afa05bc5b *data/portpirie.rda
-ce488e13c551411bf47d6fe1c7632f73 *data/rain.rda
-731169aca2b1552250e967c99e5060e4 *data/venice.rda
+a2ad6fd4504b7c286cf43a52c2d7fc00 *data/portpirie.rda
+da3423fa7401bda7eb956418e0dd4a02 *data/rain.rda
+fa22dee73a6088d017d3184d577066df *data/venice.rda
 913f9281d192f29cdfec21c703ecdac4 *data/wavesurge.rda
 0011e415e18243b50f73d8186d30bb71 *data/wind.rda
 53f46d0dd2aa92e1e6374ce3499cfb9f *data/wooster.rda
@@ -48,7 +48,7 @@ fc6b35ff29d6a4acb673e063af2b0f2a *man/gpd.fitrange.Rd
 0275e5e6f3225c3802fa62677a4056a6 *man/gum.diag.Rd
 2def14297c924b475142df9fe786a2c0 *man/gum.fit.Rd
 6316372dd9119e07b0c3d03b6b12eda2 *man/ismev-internal.Rd
-1d7d9b2de7e892b1436658a0d31ecc67 *man/ismev.Rd
+6907f02152fb5cc2a46b898a73ae391c *man/ismev.Rd
 6bf8c6599fd12ab194fe74c22a8a6582 *man/mrl.plot.Rd
 c532d6744ba68c39c9391eaa04a2f070 *man/portpirie.Rd
 5973e13ea03d06ac1c775d73d52fa96f *man/pp.diag.Rd

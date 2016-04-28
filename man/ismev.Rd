@@ -10,6 +10,22 @@ Primary functions include:
 
   Original R port was carried out by Alec G. Stephenson, and the package is
   currently being maintained by Eric Gilleland.
+
+Datasets from Coles (2001) included are:
+
+dowjones
+euroex
+fremantle
+portpirie
+venice
+wind
+engine
+exchange
+glass
+rain
+wavesurge
+wooster
+
 }
 \references{
 Coles, Stuart (2001) \emph{An Introduction to Statistical Modeling of Extreme Values}, London, UK: Springer, ISBN: 1852334592, 208 pp.
