@@ -195,7 +195,7 @@ gamGPDfitUp <- function(y, xi.nu, xiFrhs, nuFrhs, yname, verbose=TRUE, ...)
 
     if(dim.[ 2 ] < 1 || n <= 0) stop("gamGPDfitUp: invalid y argument.")
 
-    if(dim(xi.nu) != c(n, 2)) stop("gamGPDfitUp: invalid xi.nu argument.")
+    if( any( dim( xi.nu ) != c( n, 2 ) ) ) stop( "gamGPDfitUp: invalid xi.nu argument." )
     
 
 #    stopifnot(is.data.frame(y), (dim. <- dim(y))[2] >= 1,

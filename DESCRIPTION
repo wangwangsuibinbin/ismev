@@ -1,6 +1,6 @@
 Package: ismev
-Version: 1.41
-Date: 2016-04-27
+Version: 1.42
+Date: 2018-05-08
 Title: An Introduction to Statistical Modeling of Extreme Values
 Author: Original S functions written by Janet E. Heffernan with R port and R 
   documentation provided by Alec G. Stephenson.
@@ -13,7 +13,7 @@ Description: Functions to support the computations carried out in
   and point processes.  
 License: GPL (>= 2)
 URL: http://www.ral.ucar.edu/~ericg/softextreme.php
-Packaged: 2016-04-27 17:10:38 UTC; ericg
+Packaged: 2018-05-08 20:56:39 UTC; ericg
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2016-04-28 00:16:22
+Date/Publication: 2018-05-10 22:08:29 UTC
