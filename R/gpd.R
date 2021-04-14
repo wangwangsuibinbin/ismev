@@ -380,6 +380,8 @@ function(z, m, xlow, xup, npy = 365, conf = 0.95, nint = 100)
 	abline(h = ma)
 	abline(h = ma - 0.5 * qchisq(conf, 1))
 	invisible()
+	re <- list(x,ma,ma - 0.5 * qchisq(conf, 1))
+	return(re)
 }
 
 

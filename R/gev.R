@@ -337,6 +337,8 @@ function(z, m, xlow, xup, conf = 0.95, nint = 100)
 	abline(h = ma, col = 4)
 	abline(h = ma - 0.5 * qchisq(conf, 1), col = 4)
 	invisible()
+	re <- list(x,ma,ma - 0.5 * qchisq(conf, 1))
+	return(re)
 }
 
 
